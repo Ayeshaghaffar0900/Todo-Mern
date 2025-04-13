@@ -44,7 +44,31 @@ router.post('/', async (req, res) => {
 
 
 
+router.put('/:id', async (req, res) => {
+  try {
+    let todo = await Todo.findById(req.params.id);
 
+    if (!todo) {
+      return res.status(404).json({ msg: 'Todo not found' });
+    }
+
+    // Toggle the isCompleted status
+    todo = await Todo.findByIdAndUpdate(
+      req.params.id,
+      { isCompleted: !todo.isCompleted },
+      { new: true } // Return the updated document
+    );
+
+    res.json(todo);
+  } catch (err) {
+    console.error(err.message);
+    // Handle potential CastError if ID format is invalid
+    if (err.kind === 'ObjectId') {
+       return res.status(404).json({ msg: 'Todo not found' });
+    }
+    res.status(500).send('Server Error');
+  }
+});
 
 
 router.delete('/:id', async (req, res) => {
